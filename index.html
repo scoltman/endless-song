@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <div id='content'>
+  <input type='checkbox' class='playToggle'>
+  <br>
+  <br>
+  bpm:
+  <input type='range' value='80' min='50' max='200' id='bpm'>
+</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/0.10.0/Tone.min.js"></script>
+    <script type="text/javascript">
+
+    //bpm slider
+    document.querySelector('#bpm').addEventListener('input', function(e){
+    	Tone.Transport.bpm.value = parseInt(e.target.value)
+    })
+
+    var kick = new Tone.MembraneSynth().toMaster()
+    var snare = new Tone.NoiseSynth().toMaster();
+
+    //create a synth and connect it to the master output (your speakers)
+    var keys = new Tone.Synth().toMaster()
+
+
+
+    function triggerKick(time){
+    	kick.triggerAttackRelease("C1", "8n", time)
+    }
+    function triggerSnare(time){
+    	snare.triggerAttackRelease("8n", time)
+    }
+    function triggerKey(time){
+      keys.triggerAttackRelease('C5', "24n", time)
+      keys.triggerAttackRelease('D5', "24n", time + '+4n')
+      keys.triggerAttackRelease('C5', "24n", time + '+4n +4n')
+    }
+
+    Tone.Transport.bpm.value = 80;
+
+    // drums
+    Tone.Transport.schedule(triggerKick, '0')
+    Tone.Transport.schedule(triggerSnare, '4n')
+    Tone.Transport.schedule(triggerKick, '4n +4n')
+    Tone.Transport.schedule(triggerSnare, '4n +4n +4n')
+
+    // human music
+    Tone.Transport.schedule(triggerKey, 0)
+
+    Tone.Transport.loopEnd = '1m'
+    Tone.Transport.loop = true
+
+    document.querySelector('.playToggle').addEventListener('change', function(e){
+    	if (e.target.checked){
+    		Tone.Transport.start('+0.1')
+    	} else {
+    		Tone.Transport.stop()
+    	}
+    })
+    </script>
+  </body>
+</html>
