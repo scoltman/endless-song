@@ -26,30 +26,43 @@
     //create a synth and connect it to the master output (your speakers)
     var keys = new Tone.Synth().toMaster()
 
+    var human_music = [
+      ['C5', "24n", '0'],
+      ['D5', "24n", '+4n'],
+      ['C5', "24n", '+4n +4n']
+    ];
 
+    var drum_loop = [
+      ['kick', 'C1', '8n', '0'],
+      ['snare', '8n', '+4n'],
+      ['kick', 'C1', '8n', '+4n +4n'],
+      ['snare', '8n', '+4n +4n +4n']
+    ];
 
-    function triggerKick(time){
-    	kick.triggerAttackRelease("C1", "8n", time)
+    function triggerMelody(melody, time){
+      for (let note of melody){
+        keys.triggerAttackRelease(note[0], note[1], time + note[2]);
+      }
     }
-    function triggerSnare(time){
-    	snare.triggerAttackRelease("8n", time)
-    }
-    function triggerKey(time){
-      keys.triggerAttackRelease('C5', "24n", time)
-      keys.triggerAttackRelease('D5', "24n", time + '+4n')
-      keys.triggerAttackRelease('C5', "24n", time + '+4n +4n')
+
+    function triggerDrums(drums, time){
+      for (let hit of drums){
+        if(hit[0] === 'kick') {
+          kick.triggerAttackRelease(hit[1], hit[2], time + hit[3])
+        } else if (hit[0] === 'snare'){
+          snare.triggerAttackRelease(hit[1], time + hit[2])
+        }
+      }
     }
 
     Tone.Transport.bpm.value = 80;
 
-    // drums
-    Tone.Transport.schedule(triggerKick, '0')
-    Tone.Transport.schedule(triggerSnare, '4n')
-    Tone.Transport.schedule(triggerKick, '4n +4n')
-    Tone.Transport.schedule(triggerSnare, '4n +4n +4n')
+    // play drums & melody
+    Tone.Transport.schedule(function(time){
+        triggerMelody(human_music, time);
+        triggerDrums(drum_loop, time);
+    })
 
-    // human music
-    Tone.Transport.schedule(triggerKey, 0)
 
     Tone.Transport.loopEnd = '1m'
     Tone.Transport.loop = true
